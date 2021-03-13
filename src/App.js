@@ -1,28 +1,59 @@
 /*global chrome*/
 
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from "react";
 import './App.css';
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    
+    this.state = {
+     notes: []
+    }
+    this.submitEdits = this.submitEdits.bind(this);
+  }
 
-class App extends Component {
-  render() {
+  submitEdits(e) { 
+    e.preventDefault();
+    const oldNotes = this.state.notes;
+    if (!this.state.notes.some((note) => note.title === e.target.title.value)) {
+      const newNote = {
+        id: Math.random().toString(36).substr(2, 9),
+        title: e.target.title.value,
+        info: e.target.info.value,
+      };
+      oldNotes.push(newNote)
+      this.setState({notes: oldNotes});
+    } else {
+      const updatedNotes = this.state.notes.map((note) => {
+        if (note.title === e.target.title.value) {
+          return {
+            id: note.id,
+            title: note.title,
+            info: e.target.info.value,
+          };
+        } else {
+          return note;
+        }
+      })
+      this.setState({notes:updatedNotes})
+    } 
+  }; 
+  render () {
     return (
       <div className="App">
-        <header className="App-header">
-          {this.props.isExt ? 
-            <img src={chrome.runtime.getURL("static/media/logo.svg")} className="App-logo" alt="logo" />
-          :
-            <img src={logo} className="App-logo" alt="logo" />
-          }
-
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <h1>Notetaking Demo</h1>
+        <form onSubmit={this.submitEdits}>
+          <p>Title</p>
+          <input type="text" name="title" />
+          <p>Info</p>
+          <input type="text" name="info" />
+         <input type="Submit" value="Save"/>
+        </form>
+        {
+         this.state.notes.map((note) => <div key={note.id}>{note.title}: {note.info}</div> ) //Can I do window.localStorage.setItem() on this?
+        }
       </div>
     );
   }
 }
-
 export default App;
